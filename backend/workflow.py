@@ -111,7 +111,8 @@ def run_workflow(s,customer,scenario=0):
             for values in update.values(): state={**state,**values}
             wf.state=state.copy();wf.executions=state['executions'];s.commit()
         wf.status='Waiting for Human';customer.risk=state['risk'];customer.status='Approval Pending'
-        approval=Approval(customer_id=customer.id,workflow_id=wf.id,required=2 if customer.risk>=policy.get('dual_approval_threshold',75) else 1,decisions=[]);s.add(approval)
+        potential_watchlist_match=any(f.get('evidence',{}).get('potential_match') for f in state['findings'])
+        approval=Approval(customer_id=customer.id,workflow_id=wf.id,required=2 if customer.risk>=policy.get('dual_approval_threshold',75) or potential_watchlist_match else 1,decisions=[]);s.add(approval)
         if state['risk']>=policy.get('risk_threshold',65):
             s.add(Case(customer_id=customer.id,title=f'Enhanced review · {customer.name}',type='AML',priority='High',notes=[]))
             s.add(Alert(customer_id=customer.id,category='Workflow risk escalation',severity='High',evidence={'workflow_id':wf.id,'factors':[f for f in state['findings'] if f['severity']>0]}))
