@@ -1,0 +1,7 @@
+.git
+node_modules
+dist
+.env
+.vercel
+*.db
+__pycache__

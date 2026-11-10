@@ -1,0 +1,7 @@
+-r requirements.txt
+scikit-learn==1.8.0
+pandas>=2.2,<3
+joblib>=1.4,<2
+pytest>=9,<10
+reportlab>=4.4,<5
+pypdf>=6,<7

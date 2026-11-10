@@ -1,0 +1,26 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: nexora
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-nexora-local-only}
+      POSTGRES_DB: nexora
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nexora"]
+      interval: 5s
+      retries: 10
+  app:
+    build: .
+    ports: ["8000:8000"]
+    environment:
+      DATABASE_URL: postgresql+psycopg://nexora:${POSTGRES_PASSWORD:-nexora-local-only}@db:5432/nexora
+      DEMO_MODE: "true"
+      JWT_SECRET: ${JWT_SECRET:-local-only-replace-with-a-strong-secret}
+      DEMO_PASSWORD: ${DEMO_PASSWORD:-NexoraDemo!2026}
+    depends_on:
+      db:
+        condition: service_healthy
+volumes:
+  postgres-data:
